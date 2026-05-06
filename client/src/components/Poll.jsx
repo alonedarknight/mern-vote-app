@@ -58,7 +58,10 @@ const Poll = () => {
             <div className="button-group">
                 <button className="button" onClick={() => navigate('/')}>Back</button>
                 {state.user && poll.user && (state.user.id === poll.user || state.user.id === poll.user._id) && (
-                    <button className="button delete-btn" onClick={handleDelete}>Delete Poll</button>
+                    <>
+                        <button className="button" onClick={() => navigate(`/poll/${id}/edit`)}>Edit Poll</button>
+                        <button className="button delete-btn" onClick={handleDelete}>Delete Poll</button>
+                    </>
                 )}
             </div>
             <h3>{poll.question}</h3>

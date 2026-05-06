@@ -10,6 +10,7 @@ import Auth from './Auth';
 import Polls from './Polls';
 import CreatePoll from './CreatePoll';
 import Poll from './Poll';
+import EditPoll from './EditPoll';
 
 const AppContent = () => {
     const [state, dispatch] = useStore();
@@ -48,6 +49,7 @@ const AppContent = () => {
                     <Route path="/register" element={<Auth authType="register" />} />
                     <Route path="/poll/new" element={<CreatePoll />} />
                     <Route path="/poll/:id" element={<Poll />} />
+                    <Route path="/poll/:id/edit" element={<EditPoll />} />
                 </Routes>
             </div>
         </Router>

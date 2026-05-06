@@ -93,6 +93,39 @@ exports.deletePoll = async (req, res, next) => {
     }
 };
 
+exports.updatePoll = async (req, res, next) => {
+    try {
+        const { id: pollId } = req.params;
+        const { id: userId } = req.decoded;
+
+        const poll = await db.Poll.findById(pollId);
+
+        if (!poll) throw new Error('No poll found');
+
+        if (poll.user.toString() !== userId) {
+            throw new Error('Unauthorized access');
+        }
+
+        const { question, options } = req.body;
+
+        if (question) poll.question = question;
+
+        if (options && options.length >= 2) {
+            poll.options = options.map(opt => ({
+                option: opt,
+                votes: 0
+            }));
+            poll.voted = [];
+        }
+
+        await poll.save();
+
+        res.status(200).json(poll);
+    } catch (err) {
+        err.status = 400;
+        next(err);
+    }
+};
 
 exports.vote = async (req, res, next) => {
     try {
