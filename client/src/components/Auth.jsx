@@ -37,23 +37,27 @@ const Auth = ({ authType }) => {
     return (
         <div className="auth-form">
             <h2>{authType === 'login' ? 'Login' : 'Register'}</h2>
-            <form onSubmit={handleSubmit}>
-                <label className="form-label" htmlFor="username">Username</label>
-                <input
-                    className="form-input"
-                    type="text"
-                    value={username}
-                    name="username"
-                    onChange={handleChange}
-                />
-                <label className="form-label" htmlFor="password">Password</label>
-                <input
-                    className="form-input"
-                    type="password"
-                    value={password}
-                    name="password"
-                    onChange={handleChange}
-                />
+            <form className="form" onSubmit={handleSubmit}>
+                <div>
+                    <label className="form-label" htmlFor="username">Username</label>
+                    <input
+                        className="form-input"
+                        type="text"
+                        value={username}
+                        name="username"
+                        onChange={handleChange}
+                    />
+                </div>
+                <div>
+                    <label className="form-label" htmlFor="password">Password</label>
+                    <input
+                        className="form-input"
+                        type="password"
+                        value={password}
+                        name="password"
+                        onChange={handleChange}
+                    />
+                </div>
                 <button className="button" type="submit">Submit</button>
             </form>
         </div>
