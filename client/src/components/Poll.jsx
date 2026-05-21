@@ -6,6 +6,7 @@ import { useStore } from '../store';
 const Poll = () => {
     const { id } = useParams();
     const [poll, setPoll] = useState(null);
+    const [selectedOption, setSelectedOption] = useState(null);
     const [state, dispatch] = useStore();
     const navigate = useNavigate();
 
@@ -21,13 +22,39 @@ const Poll = () => {
         getPoll();
     }, [id, dispatch]);
 
-    const handleVote = async answer => {
+    const userVote = state.user && poll
+        ? poll.voted.find(v => v.user === state.user.id)
+        : null;
+    const hasVoted = !!userVote;
+
+    const handleSelect = (optionName) => {
+        if (hasVoted && optionName === userVote.answer) return;
+        setSelectedOption(optionName);
+    };
+
+    const handleConfirmVote = async () => {
+        if (!selectedOption) return;
         try {
-            const data = await api.call('post', `polls/${id}`, { answer });
+            const data = await api.call('post', `polls/${id}`, { answer: selectedOption });
             setPoll(data);
+            setSelectedOption(null);
         } catch (err) {
             dispatch({ type: 'SET_ERROR', payload: err.response?.data?.message });
         }
+    };
+
+    const handleUnvote = async () => {
+        try {
+            const data = await api.call('delete', `polls/${id}/vote`);
+            setPoll(data);
+            setSelectedOption(null);
+        } catch (err) {
+            dispatch({ type: 'SET_ERROR', payload: err.response?.data?.message });
+        }
+    };
+
+    const handleCancelSelect = () => {
+        setSelectedOption(null);
     };
 
     const handleDelete = async () => {
@@ -40,16 +67,6 @@ const Poll = () => {
     };
 
     if (!poll) return <div>Loading...</div>;
-
-    const answers = poll.options.map(option => (
-        <button
-            className="button"
-            key={option._id}
-            onClick={() => handleVote(option.option)}
-        >
-            {option.option}
-        </button>
-    ));
 
     const totalVotes = poll.options.reduce((total, option) => total + option.votes, 0);
 
@@ -65,7 +82,55 @@ const Poll = () => {
                 )}
             </div>
             <h3>{poll.question}</h3>
-            <div className="button-group">{answers}</div>
+            <div className="vote-options">
+                {poll.options.map(option => {
+                    const isUserVote = hasVoted && userVote.answer === option.option;
+                    const isSelected = selectedOption === option.option;
+
+                    return (
+                        <div key={option._id} className="vote-option-wrapper">
+                            <button
+                                className={`vote-option-btn${isSelected ? ' selected' : ''}${isUserVote ? ' voted' : ''}`}
+                                onClick={() => handleSelect(option.option)}
+                            >
+                                <span className="vote-option-radio">
+                                    {isUserVote ? '✓' : isSelected ? '●' : '○'}
+                                </span>
+                                {option.option}
+                                {isUserVote && <span className="your-vote-badge">Your vote</span>}
+                            </button>
+                            {isUserVote && !selectedOption && (
+                                <div className="confirm-vote-bar">
+                                    <span className="confirm-vote-text">
+                                        You voted for: <strong>{userVote.answer}</strong>
+                                    </span>
+                                    <div className="button-group" style={{ marginBottom: 0 }}>
+                                        <button className="button delete-btn" onClick={handleUnvote}>
+                                            ✕ Unvote
+                                        </button>
+                                    </div>
+                                </div>
+                            )}
+                            {isSelected && (
+                                <div className="confirm-vote-bar">
+                                    <span className="confirm-vote-text">
+                                        {hasVoted ? 'Change vote to: ' : 'You selected: '}
+                                        <strong>{selectedOption}</strong>
+                                    </span>
+                                    <div className="button-group" style={{ marginBottom: 0 }}>
+                                        <button className="button" onClick={handleConfirmVote}>
+                                            ✓ {hasVoted ? 'Change Vote' : 'Confirm Vote'}
+                                        </button>
+                                        <button className="button delete-btn" onClick={handleCancelSelect}>
+                                            ✕ Cancel
+                                        </button>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    );
+                })}
+            </div>
             <div className="result-container">
                 {poll.options.map(option => {
                     const percentage = totalVotes > 0 ? Math.round((option.votes / totalVotes) * 100) : 0;
@@ -90,3 +155,4 @@ const Poll = () => {
 };
 
 export default Poll;
+

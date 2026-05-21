@@ -266,3 +266,107 @@ body {
   margin-bottom: 30px;
   font-size: 2rem;
 }
+
+/* Vote Option Selection */
+.vote-options {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.vote-option-btn {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 20px;
+  border: 2px solid #e2e8f0;
+  border-radius: 12px;
+  background: #f8fafc;
+  font-family: inherit;
+  font-size: 1rem;
+  font-weight: 500;
+  color: var(--text-main);
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+.vote-option-btn:hover {
+  border-color: var(--primary);
+  background: #eef2ff;
+  transform: translateX(4px);
+}
+
+.vote-option-btn.selected {
+  border-color: var(--primary);
+  background: linear-gradient(135deg, #eef2ff, #e0e7ff);
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+}
+
+.vote-option-btn.voted {
+  border-color: var(--success);
+  background: linear-gradient(135deg, #ecfdf5, #d1fae5);
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.15);
+}
+
+.vote-option-radio {
+  font-size: 1.2rem;
+  color: var(--primary);
+  line-height: 1;
+}
+
+.vote-option-btn.voted .vote-option-radio {
+  color: var(--success);
+}
+
+.your-vote-badge {
+  margin-left: auto;
+  background: #d1fae5;
+  color: #065f46;
+  font-size: 0.72rem;
+  padding: 3px 8px;
+  border-radius: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.confirm-vote-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 8px 14px;
+  margin-top: 6px;
+  background: linear-gradient(135deg, #eef2ff, #fdf2f8);
+  border-radius: 8px;
+  border: 1px solid rgba(99, 102, 241, 0.2);
+  animation: slideUp 0.2s ease;
+}
+
+.confirm-vote-bar .button {
+  padding: 6px 14px;
+  font-size: 0.8rem;
+  border-radius: 7px;
+}
+
+.confirm-vote-text {
+  font-size: 0.82rem;
+  color: var(--text-muted);
+}
+
+.confirm-vote-text strong {
+  color: var(--primary);
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+

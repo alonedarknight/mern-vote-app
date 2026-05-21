@@ -130,42 +130,61 @@ exports.updatePoll = async (req, res, next) => {
 exports.vote = async (req, res, next) => {
     try {
         const { id: pollId } = req.params;
-
         const { id: userId } = req.decoded;
-
         const { answer } = req.body;
 
-        if (answer) {
-            const poll = await db.Poll.findById(pollId);
+        if (!answer) throw new Error('No answer provided');
 
-            if (!poll) throw new Error('No poll found');
+        const poll = await db.Poll.findById(pollId);
+        if (!poll) throw new Error('No poll found');
 
-            const vote = poll.options.map(
-                option => {
-                    if (option.option === answer) {
-                        return {
-                            option: option.option,
-                            _id: option._id,
-                            votes: option.votes + 1
-                        };
-                    } else {
-                        return option;
-                    }
-                }
-            );
+        const targetOption = poll.options.find(o => o.option === answer);
+        if (!targetOption) throw new Error('Invalid option');
 
-            if (poll.voted.filter(user =>
-                user.toString() === userId).length <= 0) {
-                poll.voted.push(userId);
-                poll.options = vote;
-                await poll.save();
-                res.status(202).json(poll);
-            } else {
-                throw new Error('Already voted');
+        const existingVote = poll.voted.find(v => v.user.toString() === userId);
+
+        if (existingVote) {
+            if (existingVote.answer === answer) {
+                throw new Error('Already voted for this option');
             }
+            // Decrement old option
+            const oldOption = poll.options.find(o => o.option === existingVote.answer);
+            if (oldOption) oldOption.votes = Math.max(0, oldOption.votes - 1);
+            // Increment new option
+            targetOption.votes += 1;
+            existingVote.answer = answer;
         } else {
-            throw new Error('No answer provided');
+            targetOption.votes += 1;
+            poll.voted.push({ user: userId, answer });
         }
+
+        await poll.save();
+        res.status(202).json(poll);
+    } catch (err) {
+        err.status = 400;
+        next(err);
+    }
+};
+
+exports.unvote = async (req, res, next) => {
+    try {
+        const { id: pollId } = req.params;
+        const { id: userId } = req.decoded;
+
+        const poll = await db.Poll.findById(pollId);
+        if (!poll) throw new Error('No poll found');
+
+        const existingVoteIndex = poll.voted.findIndex(v => v.user.toString() === userId);
+        if (existingVoteIndex === -1) throw new Error('You have not voted');
+
+        const existingVote = poll.voted[existingVoteIndex];
+        const option = poll.options.find(o => o.option === existingVote.answer);
+        if (option) option.votes = Math.max(0, option.votes - 1);
+
+        poll.voted.splice(existingVoteIndex, 1);
+
+        await poll.save();
+        res.status(202).json(poll);
     } catch (err) {
         err.status = 400;
         next(err);

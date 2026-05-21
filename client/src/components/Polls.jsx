@@ -43,7 +43,7 @@ const Polls = () => {
                             <div className="poll-card">
                                 <div className="poll-info">
                                     <span>{poll.question}</span>
-                                    {state.user && poll.voted && poll.voted.includes(state.user.id) && (
+                                    {state.user && poll.voted && poll.voted.some(v => v.user === state.user.id) && (
                                         <span className="voted-badge">Voted</span>
                                     )}
                                 </div>
